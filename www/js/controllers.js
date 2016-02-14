@@ -1,4 +1,9 @@
-angular.module('starter.controllers', [])
+angular.module('starter.controllers', ["ionic","firebase"])
+
+.factory("Items", function($firebaseArray) {
+    var itemsRef = new Firebase("https://cassandre.firebaseio.com/items");
+    return $firebaseArray(itemsRef);
+})
 
 .controller('AppCtrl', function($scope, $ionicModal, $timeout) {
     console.log('Enter in the AppCtrl controller');
@@ -90,7 +95,7 @@ $scope.myGoBack = function() {
         $scope.mythumbnails = [
             { title: 'Reggae', subtitle:'Bien posey', id: 1, img:'ionic.png'},
             { title: 'Chill', subtitle:'Electro clubbing', id: 2, img:'ionic.png'},
-            { title: 'Dubstep', subtitle:'Danse frénétique', id: 3, img:'ionic.png'},
+            { title: 'Dubstep', subtitle:'Danse frénétique', id: 3, img:'ionic.png'}
         ];
         $scope.otherthumbnails = [
             { title: 'River', subtitle:'Il fait un froid de canard ici', id: 4, img:'riviere.jpg', avatar:'avat1.png',describe:'Prend toi en photo te baignant dans une rivière.'},
@@ -98,4 +103,23 @@ $scope.myGoBack = function() {
             { title: 'Bal de Promo', subtitle:'Invite ton mec', id: 6, img:'beaugosse.jpg', avatar:'avat1.png',describe:'Le ball de promo arrive à grand pas. Trouve toi un compagnon à inviter et tu remportes le challenge'}
         ];
     })
-;
+
+//Firebase controller
+.controller("FirebaseCtrl", function($scope, $ionicListDelegate, Items) {
+
+        $scope.items = Items;
+
+        $scope.addItem = function() {
+            var name = prompt("What do you need to buy?");
+            if (name) {
+                $scope.items.$add({
+                    "name": name
+                });
+            }
+        };
+        $scope.purchaseItem=function(item) {
+            var itemRef = new Firebase('https://cassandre.firebaseio.com/items/' + item.$id);
+            itemRef.child('status').set('purchased');
+            $ionicListDelegate.closeOptionButtons();
+        };
+    });
